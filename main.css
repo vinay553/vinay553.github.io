@@ -38,7 +38,7 @@ h1 {
 .jumbotron {
     display: flex;
     align-items: center;
-    background-image: url('Images/jumbotron_image.png');
+    background-image: url('images/jumbotron_image.png');
     background-position: center center;    
     background-size: cover;
     height: 500px;
