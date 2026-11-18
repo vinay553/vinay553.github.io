@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore life expectancy, household income, and racial and ethnic composition across U.S. counties.">
+  <title>Life Expectancy by County | U.S. County Atlas</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="data/d3.min.js"></script>
+  <script defer src="atlas.js"></script>
+</head>
+<body>
+  <header class="masthead"><div class="frame masthead-inner">
+    <a href="./" class="wordmark">U.S. County Atlas</a>
+    <a href="#methods">Data &amp; methods</a>
+  </div></header>
+  <main class="frame">
+    <header class="intro">
+      <div class="eyebrow">UNITED STATES · 2010–2015</div>
+      <h1>Life expectancy<br>by county</h1>
+      <p>Explore how long people live across the U.S. and how county comparisons change after accounting for income and racial and ethnic composition.</p>
+    </header>
+    <div id="load-status" class="load" role="status">Loading county data…</div>
+    <section id="explorer" class="explorer" aria-label="County explorer" hidden>
+      <div class="map-panel">
+        <div class="toolbar">
+          <fieldset class="metric"><legend>Color counties by</legend>
+            <label><input name="metric" type="radio" value="observed" checked><span>Unadjusted</span></label>
+            <label><input name="metric" type="radio" value="adjusted"><span>Adjusted</span></label>
+          </fieldset>
+          <form id="find" class="search" role="search">
+            <label for="query">Find a county</label>
+            <input id="query" type="search" placeholder="e.g. Alameda, CA" autocomplete="off" spellcheck="false" aria-controls="results">
+            <div id="results" class="results" hidden></div>
+          </form>
+        </div>
+        <div id="map-shell" class="map-shell">
+          <canvas id="map" aria-label="Map of U.S. counties. Click a county or use the county search to select one."></canvas>
+          <div class="map-buttons" aria-label="Map zoom">
+            <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+            <button type="button" id="reset" aria-label="Reset map view">↺</button>
+          </div>
+          <div id="tooltip" class="tooltip" hidden></div>
+        </div>
+        <div class="map-footer">
+          <div><strong>Life expectancy at birth</strong><span id="legend-context">Unadjusted · years</span></div>
+          <div id="legend" class="legend" aria-label="Map color scale"></div>
+          <span class="no-data"><i></i> No estimate</span>
+        </div>
+        <p class="map-note">Select a county on the map or use the search. Drag to pan after zooming.</p>
+      </div>
+      <aside class="detail" aria-label="Selected county">
+        <div id="profile" aria-live="polite"></div>
+      </aside>
+    </section>
+    <section id="methods" class="methods">
+      <div>
+        <div class="eyebrow">READING THE MAP</div>
+        <h2>What the adjustment measures</h2>
+      </div>
+      <div>
+        <p><strong>Unadjusted.</strong> We average CDC’s 2010–2015 estimates of life expectancy at birth for each county’s census tracts, weighting by their 2010 Census populations. A county needs estimates for tracts covering at least 80% of its 2010 population. This is a county summary of tract estimates, so it can differ from life expectancy calculated directly from a county’s death records.</p>
+        <p><strong>Adjusted.</strong> We fit a linear regression with one observation per county. The inputs are the natural log of median household income and seven of the eight race and ethnicity shares shown above. The shares sum to 100%, so non-Hispanic White is the reference category. We use the 2011–2015 American Community Survey for both inputs.</p>
+        <p class="formula">Adjusted = unadjusted − model prediction + average unadjusted value</p>
+        <p>This puts the residual back on a years scale. A higher adjusted value means the county’s estimate exceeded what this model predicted. The model describes associations across counties. It cannot estimate the effect of race or income on any individual’s life expectancy.</p>
+        <p id="model-summary"></p>
+        <ul class="sources">
+          <li><a href="https://data.cdc.gov/d/5h56-n989">CDC / NCHS tract life expectancy</a></li>
+          <li><a href="https://www.census.gov/geographies/reference-files/2010/geo/gazetter-file.html">2010 Census population weights</a></li>
+          <li><a href="https://data.census.gov/table/ACSDT5Y2015.B19013">ACS household income</a> and <a href="https://data.census.gov/table/ACSDT5Y2015.B03002">race and Hispanic origin</a></li>
+          <li><a href="https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html">Census cartographic boundaries</a></li>
+          <li><a href="data/county-data.json" download>County data and coefficients</a> · <a href="scripts/build_data.py">Reproducible calculation</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
