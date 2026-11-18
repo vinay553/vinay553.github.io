@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Step through transformer inference and see how prefill, decoding, and the KV cache work.">
+  <title>Prefill &amp; Decode | Inference Lab</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="lab.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <a class="brand" href="./"><span aria-hidden="true" class="brand-icon"><i></i><i></i><i></i><i></i></span>Inference Lab</a>
+      <a href="#under-the-hood">Under the hood <span aria-hidden="true">↘</span></a>
+    </div>
+  </header>
+  <main class="frame">
+    <header class="intro">
+      <div>
+        <p class="eyebrow">TRANSFORMER INFERENCE</p>
+        <h1>Prefill <em>&amp;</em> decode</h1>
+      </div>
+      <p class="intro-copy">Follow a prompt through a language model. See how it produces the first token and reuses its attention cache to generate the rest.</p>
+    </header>
+
+    <section class="lab" id="lab" aria-label="Interactive inference walkthrough">
+      <div class="lab-toolbar">
+        <div class="example">
+          <label for="example">Example prompt</label>
+          <select id="example">
+            <option value="moon">The moon orbits the</option>
+            <option value="water">Water freezes at</option>
+            <option value="long">Finish this sentence about our solar system:</option>
+          </select>
+        </div>
+        <div class="transport" aria-label="Playback controls">
+          <button id="reset" type="button">Reset</button>
+          <button id="back" type="button" aria-label="Previous step" title="Previous step (←)">←</button>
+          <button id="play" type="button">Play</button>
+          <button id="next" type="button" aria-label="Next step" title="Next step (→)">Next <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+
+      <div class="timeline-wrap">
+        <ol id="timeline" class="timeline" aria-label="Inference steps"></ol>
+      </div>
+
+      <div class="lab-body">
+        <div class="visual">
+          <div class="sequence">
+            <h2>Token sequence</h2>
+            <div id="sequence" class="tokens" aria-label="Prompt and generated tokens"></div>
+            <div class="token-key">
+              <span><i class="key-prompt"></i>Prompt</span>
+              <span><i class="key-output"></i>Generated</span>
+              <span><i class="key-active"></i>Current input</span>
+            </div>
+          </div>
+          <div class="diagrams">
+            <section class="attention">
+              <h2>Attention pattern</h2>
+              <p>Each row is a query. Each column is a key position.</p>
+              <div id="attention" class="matrix-scroll"></div>
+              <div id="matrix-key" class="token-key matrix-key"></div>
+            </section>
+
+            <section class="cache">
+              <h2>KV cache <span id="cache-total"></span></h2>
+              <p>Key and value vectors stored after this pass.</p>
+              <div id="cache" class="cache-pairs" aria-label="Cached token positions"></div>
+              <div class="token-key">
+                <span><i class="key-reused"></i>Already stored</span>
+                <span><i class="key-fresh"></i>Newly stored</span>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <aside class="inspector" aria-label="Current step">
+          <div id="step-description" aria-live="polite" aria-atomic="true"></div>
+          <dl class="counts">
+            <div><dt>Input tokens this pass</dt><dd id="inputs">0</dd></div>
+            <div><dt>Visible query–key pairs</dt><dd id="pairs">0</dd></div>
+          </dl>
+          <p class="footnote">This is an illustration of one sequence with full causal attention. Tokens and outputs are scripted.</p>
+        </aside>
+      </div>
+    </section>
+    <noscript><p>Enable JavaScript to use the walkthrough.</p></noscript>
+
+    <section class="under" id="under-the-hood" aria-labelledby="under-title">
+      <div class="under-heading">
+        <p class="eyebrow">UNDER THE HOOD</p>
+        <h2 id="under-title">Why the two passes feel different</h2>
+      </div>
+      <div class="explain-grid">
+        <article>
+          <h3>Prefill processes the prompt</h3>
+          <p>The prompt is already known, so a full prefill can process its token positions together. The causal mask lets each position attend only to itself and earlier positions. The last prompt position supplies the next-token logits, and the model can emit its first token from those logits.</p>
+          <p>Prefill contributes to <strong>time to first token</strong>, along with work such as scheduling and tokenization.</p>
+        </article>
+        <article>
+          <h3>Decode extends the sequence</h3>
+          <p>Each standard decode pass takes the previously emitted token as input. It computes that token’s query, key, and value at each layer and reads the saved keys and values for earlier positions. The resulting logits are used to choose the next token.</p>
+          <p>Repeated decode passes determine the <strong>time between output tokens</strong>. With full attention, each pass attends to more positions as the sequence grows.</p>
+        </article>
+        <article>
+          <h3>What the cache saves</h3>
+          <p>The cache stores keys and values by position and layer. It avoids recomputing them for earlier tokens, but the new query still attends to the cached positions. A generated token joins the cache only when it goes through a forward pass.</p>
+          <p>Visible query–key pairs in the demo count unmasked attention entries. They do not measure runtime or memory use.</p>
+        </article>
+      </div>
+      <p class="reading">Further reading <a href="https://huggingface.co/docs/transformers/cache_explanation">Hugging Face’s KV cache guide</a> <a href="https://huggingface.co/docs/transformers/main_classes/text_generation">Text generation options</a></p>
+    </section>
+  </main>
+</body>
+</html>
