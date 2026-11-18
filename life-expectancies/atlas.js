@@ -173,6 +173,10 @@ function lifeValue(value) {
   return value === null ? '—' : `${value.toFixed(1)} <small>yrs</small>`;
 }
 
+function populationValue(county) {
+  return county.population == null ? '—' : number.format(county.population);
+}
+
 function select(id, share = true) {
   const county = countyById.get(id) || countyById.get('06001') || counties[0];
   selected = county.id;
@@ -190,8 +194,12 @@ function select(id, share = true) {
       <div><dt>Adjusted</dt><dd>${lifeValue(county.adjusted)}</dd></div>
     </dl>
     <p class="coverage" id="tract-coverage"></p>
-    <div class="income"><span>Median household income <small>(2015 dollars)</small></span>
-      <strong>${county.income ? money.format(county.income) : '—'}</strong></div>
+    <div class="county-facts">
+      <div><span>Population <small>(2011–2015 ACS)</small></span>
+        <strong>${populationValue(county)}</strong></div>
+      <div><span>Median household income <small>(2015 dollars)</small></span>
+        <strong>${county.income ? money.format(county.income) : '—'}</strong></div>
+    </div>
     <h3>Race and ethnicity</h3>
     <ul class="race"></ul>
     <p class="race-note">2011–2015 ACS. Hispanic or Latino includes any race. All other groups are non-Hispanic.</p>`;
@@ -300,7 +308,8 @@ map.addEventListener('pointermove', event => {
   if (!tooltip.hidden) {
     const county = countyById.get(id);
     const value = county[metric];
-    tooltip.textContent = `${county.label} · ${value === null ? 'No estimate' : value.toFixed(1) + ' years'}`;
+    const life = value === null ? 'No estimate' : value.toFixed(1) + ' years';
+    tooltip.textContent = `${county.label} · ${life} · Population ${populationValue(county)}`;
     tooltip.style.left = `${Math.max(4, Math.min(point.x + 12, width - tooltip.offsetWidth - 4))}px`;
     tooltip.style.top = `${Math.max(4, point.y - tooltip.offsetHeight - 9)}px`;
   }

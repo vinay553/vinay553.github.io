@@ -69,8 +69,11 @@ canvas.dragging { cursor: grabbing; }
 .detail dl dd small { font-weight: 500; font-size: .68rem; }
 .coverage { color: var(--soft); margin: 7px 0 13px; font-size: .75rem; }
 .detail h3 { margin: 14px 0 7px; font-size: .88rem; }
-.income { border-block: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 9px 0; font-size: .79rem; }
-.income strong { font-size: .96rem; }
+.county-facts { border-block: 1px solid var(--line); }
+.county-facts div { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 9px 0; font-size: .79rem; }
+.county-facts div + div { border-top: 1px solid var(--line); }
+.county-facts strong { font-size: .96rem; }
+.county-facts small { display: block; color: var(--soft); }
 .race { padding: 0; margin: 0; list-style: none; }
 .race li { margin-top: 5px; font-size: .74rem; }
 .race .race-label { display: flex; justify-content: space-between; align-items: start; gap: 6px; }
@@ -93,5 +96,4 @@ canvas.dragging { cursor: grabbing; }
   .search { flex: 1 1 100%; }
   .methods { grid-template-columns: 1fr; gap: 12px; }
 }
-.income small { display: block; color: var(--soft); }
 .map-buttons button:disabled { opacity: .45; cursor: default; }
