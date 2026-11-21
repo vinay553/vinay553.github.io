@@ -1,0 +1,312 @@
+.brand,
+.eyebrow b {
+  white-space: nowrap;
+}
+
+.rail .role-guide {
+  margin: 22px 8px;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.role-guide summary {
+  color: var(--green);
+  font-weight: 620;
+}
+
+.brief {
+  margin: 20px 0;
+  padding: 12px 17px;
+  border-left: 3px solid #52876a;
+  background: #eff4ed;
+}
+
+.brief p {
+  margin: 4px 0;
+}
+
+.sim {
+  margin: 22px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  overflow: hidden;
+  background: white;
+}
+
+.simhead {
+  padding: 16px 22px 12px;
+  color: #eff8ee;
+  background: var(--dark);
+}
+
+.simhead h2 {
+  margin: 3px 0;
+  font-size: clamp(1.3rem, 2.1vw, 1.8rem);
+  line-height: 1.25;
+  letter-spacing: -.035em;
+}
+
+.simhead p {
+  margin: 4px 0 0;
+  font: .81rem/1.45 var(--mono);
+  color: #c1dec9;
+}
+
+.simbody {
+  padding: 16px 22px 20px;
+}
+
+.simbody p {
+  margin: 9px 0;
+}
+
+.simbody h3 {
+  margin: 4px 0 9px;
+  font-size: 1.1rem;
+}
+
+.panel-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 18px;
+  padding: 13px 21px;
+  background: #eef5ec;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-controls label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.panel-controls select {
+  max-width: 100%;
+}
+
+.panel-controls input[type=checkbox],
+.rubric input {
+  accent-color: var(--green);
+  width: 17px;
+  height: 17px;
+}
+
+.readouts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 2px 0 14px;
+}
+
+.readout {
+  padding-left: 11px;
+  border-left: 2px solid #8bc1a1;
+}
+
+.readout small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.readout strong {
+  display: block;
+  line-height: 1.4;
+  font: 650 clamp(1.02rem, 2.1vw, 1.52rem)/1.45 var(--mono);
+  color: var(--dark);
+}
+
+.trace {
+  background: #183e37;
+  color: #eaf8e8;
+  padding: 13px 15px;
+  border-radius: 6px;
+}
+
+.trace-row {
+  display: grid;
+  grid-template-columns: minmax(83px, .55fr) 2fr 66px;
+  align-items: center;
+  gap: 8px;
+  font-size: .85rem;
+  min-height: 27px;
+}
+
+.trace-row output {
+  text-align: right;
+  color: #c1e3ce;
+  font: .78rem var(--mono);
+}
+
+.trackline {
+  background: #395a50;
+  position: relative;
+  height: 8px;
+  border-radius: 3px;
+}
+
+.trackline i {
+  position: absolute;
+  height: 100%;
+  min-width: 2px;
+  background: #a5ebc4;
+  border-radius: 2px;
+}
+
+.trace-row:nth-child(even) i {
+  background: #ffb183;
+}
+
+.readtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  margin: 9px 0;
+}
+
+.readtable caption {
+  text-align: left;
+  font-weight: 650;
+  padding: 4px 0;
+}
+
+.readtable th,
+.readtable td {
+  border-bottom: 1px solid var(--line);
+  padding: 7px 5px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.readtable th {
+  color: var(--muted);
+}
+
+details.solve {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+
+details.solve summary {
+  font-weight: 625;
+  color: var(--green);
+}
+
+details.solve p {
+  margin: 10px 0 2px;
+}
+
+.rubric {
+  margin: 12px 0 8px;
+  padding: 0;
+  border: none;
+}
+
+.rubric legend {
+  font-weight: 650;
+}
+
+.rubric label {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 3px 0;
+}
+
+.rubric input {
+  flex: none;
+  align-self: flex-start;
+  margin-top: 5px;
+}
+
+.source-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.saved {
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.downloads {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.downloads a {
+  text-decoration: none;
+}
+
+code,
+pre {
+  font-family: var(--mono);
+}
+
+.simbody pre {
+  overflow-x: auto;
+  padding: 12px;
+  background: #eff4ed;
+  font-size: .85rem;
+}
+
+.clock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 0;
+}
+
+.clock output {
+  font: 650 1rem var(--mono);
+}
+
+@media(max-width:580px) {
+
+  .panel-controls,
+  .simbody,
+  .simhead {
+    padding: 13px
+  }
+
+  .readouts {
+    gap: 6px
+  }
+
+  .readout {
+    padding-left: 5px
+  }
+
+  .trace {
+    padding: 8px
+  }
+
+  .trace-row {
+    grid-template-columns: 82px minmax(25px, 1fr) 55px;
+    gap: 4px;
+    font-size: .75rem
+  }
+
+  .trace-row output {
+    font-size: .71rem
+  }
+
+  .readtable th,
+  .readtable td {
+    padding: 6px 3px
+  }
+
+  .readout small {
+    font-size: .75rem
+  }
+}

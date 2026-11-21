@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102f2d">
+  <meta name="description" content="Practice voice AI engineering interviews with worked audio traces, GPU serving experiments, a coding round, and a system design mock.">
+  <title>Voice AI interview studio · Signal School</title>
+  <link rel="icon" href="../icon.png"><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="studio.css">
+  <script defer src="rounds.js"></script><script defer src="experiments.js"></script><script defer src="studio.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to practice round</a>
+<header class="mast"><div class="mast-inner">
+  <a class="brand" href="../"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Signal School</a>
+  <span class="mast-course">Voice AI interview studio</span><a class="booklink" href="../" aria-label="WebRTC field guide">Field guide</a>
+  <button id="menu" aria-controls="sidebar" aria-expanded="false">Rounds</button>
+</div></header>
+<div class="layout">
+<aside id="sidebar"><div class="rail">
+  <div class="rail-label">Interview rounds</div><nav id="rounds" aria-label="Interview rounds"></nav>
+  <div class="progress"><div><strong>Self-assessment</strong><span id="progressText"></span></div><progress id="progress" max="21" value="0" aria-label="Rubric items demonstrated"></progress></div>
+  <details class="role-guide"><summary>Choose a practice path</summary><p><b>Media and agent infrastructure</b><br>Start with the <a href="#latency">latency trace</a>, then interruptions, audio ingress and the design mock.</p><p><b>Model inference and serving</b><br>Start with the <a href="#serving">GPU queue</a>, then model profiling, coding and the design mock.</p></details>
+</div></aside>
+<main id="main" tabindex="-1"><div id="content"></div><noscript>Enable JavaScript for the interactive rounds. The <a href="playout_exercise.py" download>Python coding exercise</a> also works offline.</noscript></main>
+</div></body></html>

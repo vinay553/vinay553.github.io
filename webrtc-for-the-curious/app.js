@@ -195,6 +195,20 @@
     if (i + 1 < chapters.length) foot.append(link('Next: ' + chapters[i + 1].nav, '#' + chapters[i + 1].id));
     else foot.append(link('Return to the first chapter', '#overview'));
     hw.append(foot);
+    const interviews = {
+      overview: ['latency', 'Trace a voice agent’s first audible response'],
+      networking: ['audio', 'Budget a streaming speech recognizer'],
+      media: ['interruptions', 'Debug interruption and stale audio'],
+      data: ['coding', 'Implement a cancellable playout queue'],
+      applied: ['serving', 'Schedule speech inference on a GPU'],
+      debugging: ['mock', 'Run a voice systems design interview']
+    };
+    if (interviews[c.id]) {
+      const [round, title] = interviews[c.id];
+      const advanced = D('p', 'Interview practice · ');
+      advanced.append(link(title, 'voice-ai/#' + round));
+      hw.append(advanced);
+    }
     lesson.append(intro, tabs, lab, notes, hw);
     cleanup = window.labs.mount(lab, c);
   }
