@@ -3,23 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore life expectancy, household income, and racial and ethnic composition across U.S. counties.">
-  <title>Life Expectancy by County | U.S. County Atlas</title>
+  <meta name="description" content="Explore life expectancy across U.S. counties and UK local authority areas, including an exploratory regression adjustment.">
+  <title>Life Expectancy Atlas | U.S. Counties and UK Local Areas</title>
   <link rel="stylesheet" href="style.css">
   <script defer src="data/d3.min.js"></script>
   <script defer src="atlas.js"></script>
 </head>
 <body>
   <header class="masthead"><div class="frame masthead-inner">
-    <a href="./" class="wordmark">U.S. County Atlas</a>
+    <a href="./" class="wordmark">Life Expectancy Atlas</a>
     <a href="#methods">Data &amp; methods</a>
   </div></header>
   <main class="frame">
     <header class="intro">
-      <div class="eyebrow">UNITED STATES · 2010–2015</div>
-      <h1>Life expectancy<br>by county</h1>
-      <p>Explore how long people live across the U.S. and how county comparisons change after accounting for income and racial and ethnic composition.</p>
+      <div class="eyebrow">UNITED STATES · UNITED KINGDOM</div>
+      <h1>Life expectancy<br>across the U.S. &amp; UK</h1>
+      <p>Explore U.S. county life expectancy and compare it with UK local areas. The UK comparison applies the existing U.S. regression to the closest available UK measures.</p>
     </header>
+    <section class="uk-section" aria-labelledby="uk-title">
+      <div class="uk-heading">
+        <div><div class="eyebrow">UNITED KINGDOM · 2011–2013</div><h2 id="uk-title">How does the UK compare?</h2></div>
+        <p id="uk-description">Loading UK local-area data…</p>
+      </div>
+      <div id="uk-summary" class="uk-summary" aria-live="polite"></div>
+      <div class="uk-toolbar">
+        <p>Explore the local-authority breakdown. Select a column heading to sort.</p>
+        <div class="uk-filters">
+          <label for="uk-country">Nation</label>
+          <select id="uk-country"><option value="all">All UK nations</option><option>England</option><option>Scotland</option><option>Wales</option><option>Northern Ireland</option></select>
+          <label class="sr-only" for="uk-search">Search local areas</label>
+          <input id="uk-search" type="search" placeholder="Search an area…" autocomplete="off">
+        </div>
+      </div>
+      <div class="uk-table-wrap"><table class="uk-table">
+        <thead><tr><th><button data-sort="name">Local area <span>↕</span></button></th><th><button data-sort="country">Nation <span>↕</span></button></th><th><button data-sort="observed">Observed <span>↕</span></button></th><th><button data-sort="adjusted">Adjusted <span>↕</span></button></th><th><button data-sort="difference">vs U.S. baseline <span>↕</span></button></th></tr></thead>
+        <tbody id="uk-rows"></tbody>
+      </table></div>
+      <p id="uk-empty" class="uk-empty" hidden>No local areas match that search.</p>
+      <div class="uk-method">
+        <p><strong>What the adjustment does.</strong> Each UK area’s observed estimate is compared with the prediction from the existing U.S. county regression, then shifted back to the U.S. county average. The table reports the result and its difference from that 77.8-year U.S. baseline. A positive difference means the local-area estimate is above the baseline after this model adjustment.</p>
+        <p><strong>Read this as exploratory.</strong> UK life expectancy is the simple mean of the male and female estimates. UK 2011 Census ethnic groups are mapped to the nearest U.S. categories; several U.S. categories have no UK equivalent. For income, ONS gross disposable household income per person is converted to U.S. dollars and used as a proxy for the U.S. median household income measure. That difference can materially affect the adjusted result, so the 6.2-year UK average should not be treated as a definitive apples-to-apples estimate or a causal effect. The unadjusted local-area mean is also shown for context.</p>
+        <p>Results cover <span id="uk-coverage"></span>. <a href="data/uk-area-data.json" download>Download the UK area data</a> · <a href="scripts/build_uk_data.py">Calculation script</a>.</p>
+        <ul class="sources">
+          <li><a href="https://www.ons.gov.uk/datasets/life-expectancy-by-local-authority/editions/time-series/versions/1">ONS life expectancy by local authority</a></li>
+          <li><a href="https://www.nomisweb.co.uk/datasets/c2011ks201ew">ONS / Nomis 2011 Census ethnicity, England and Wales</a> · <a href="https://www.scotlandscensus.gov.uk/documents/2011-census-table-data-council-area-2011/">Scotland Census ethnicity</a> · <a href="https://www.nisra.gov.uk/publications/2011-census-quick-statistics-tables-ethnicity-identity-language-and-religion">NISRA Census ethnicity</a></li>
+          <li><a href="https://www.ons.gov.uk/economy/regionalaccounts/grossdisposablehouseholdincome/datasets/regionalgrossdisposablehouseholdincomegdhibylocalauthorityintheuk">ONS local-authority gross disposable household income</a> · <a href="https://api.worldbank.org/v2/country/GBR/indicator/PA.NUS.FCRF?date=2011:2013&amp;format=json">World Bank historical exchange rates</a></li>
+        </ul>
+      </div>
+    </section>
     <div id="load-status" class="load" role="status">Loading county data…</div>
     <section id="explorer" class="explorer" aria-label="County explorer" hidden>
       <div class="map-panel">

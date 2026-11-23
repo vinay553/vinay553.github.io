@@ -22,8 +22,9 @@ const noData = '#e0dfd8';
 const normalize = value => value.toLowerCase().normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ');
 
-let width, height, pixelRatio, countyShapes, statePath, dataset, mapData, stateData;
+let width, height, pixelRatio, countyShapes, statePath, dataset, mapData, stateData, ukDataset;
 let counties, countyById, stateNames, selected, hovered, drag;
+let ukAreas = [], ukSort = {key: 'difference', direction: -1};
 let metric = 'observed';
 let paintedView, paintedMetric;
 let view = {scale: 1, x: 0, y: 0};
@@ -35,9 +36,10 @@ async function load(path) {
 }
 
 async function start() {
-  [dataset, mapData, stateData] = await Promise.all([
-    load('data/county-data.json'), load('data/counties.json'), load('data/states.json')
+  [dataset, mapData, stateData, ukDataset] = await Promise.all([
+    load('data/county-data.json'), load('data/counties.json'), load('data/states.json'), load('data/uk-area-data.json')
   ]);
+  initializeUK();
   stateNames = Object.fromEntries(stateData.features.map(({properties}) => [properties.abbr, properties.name]));
   counties = Object.entries(dataset.counties).map(([id, stats]) => ({
     ...stats, id, label: `${stats.name}, ${stats.state}`,
@@ -60,6 +62,66 @@ async function start() {
   select(new URLSearchParams(location.search).get('county') || '06001', false);
   new ResizeObserver(rebuildMap).observe(map);
 }
+
+function initializeUK() {
+  const {summary, areas} = ukDataset;
+  ukAreas = Object.entries(areas).map(([code, area]) => ({...area, code}));
+  const cards = [
+    ['UK observed mean', `${summary.meanObserved.toFixed(1)} years`, 'Across local areas, before adjustment'],
+    ['UK adjusted mean', `${summary.meanAdjusted.toFixed(1)} years`, 'After applying the U.S. model'],
+    ['Adjusted vs U.S.', `${summary.meanDifference >= 0 ? '+' : ''}${summary.meanDifference.toFixed(1)} years`, `U.S. county baseline: ${summary.usBaseline.toFixed(1)} years`]
+  ];
+  byId('uk-summary').replaceChildren(...cards.map(([title, value, note]) => {
+    const card = document.createElement('article');
+    card.className = 'uk-stat';
+    const heading = document.createElement('span');
+    heading.textContent = title;
+    const strong = document.createElement('strong');
+    strong.textContent = value;
+    const caption = document.createElement('small');
+    caption.textContent = note;
+    card.append(heading, strong, caption);
+    return card;
+  }));
+  byId('uk-description').textContent = `A simple average of ${number.format(summary.n)} UK local authorities is ${summary.meanObserved.toFixed(1)} years observed and ${summary.meanAdjusted.toFixed(1)} years after adjustment. The model-adjusted mean is ${summary.meanDifference.toFixed(1)} years above the U.S. county baseline.`;
+  byId('uk-coverage').textContent = `${number.format(summary.n)} UK local authorities with matched data. Historical county and regional geographies are omitted.`;
+  renderUK();
+}
+
+function renderUK() {
+  const nation = byId('uk-country').value;
+  const queryText = normalize(byId('uk-search').value.trim());
+  const filtered = ukAreas.filter(area => (nation === 'all' || area.country === nation) &&
+    (!queryText || normalize(`${area.name} ${area.country}`).includes(queryText)));
+  const {key, direction} = ukSort;
+  filtered.sort((a, b) => {
+    const av = a[key], bv = b[key];
+    return typeof av === 'number' ? (av - bv) * direction : String(av).localeCompare(String(bv)) * direction;
+  });
+  const rows = filtered.map(area => {
+    const tr = document.createElement('tr');
+    const diff = `${area.difference >= 0 ? '+' : ''}${area.difference.toFixed(1)} yrs`;
+    for (const value of [area.name, area.country, `${area.observed.toFixed(1)} yrs`, `${area.adjusted.toFixed(1)} yrs`, diff]) {
+      const td = document.createElement('td');
+      td.textContent = value;
+      tr.append(td);
+    }
+    tr.lastElementChild.classList.add(area.difference >= 0 ? 'positive' : 'negative');
+    return tr;
+  });
+  byId('uk-rows').replaceChildren(...rows);
+  byId('uk-empty').hidden = rows.length > 0;
+}
+
+byId('uk-country').addEventListener('change', renderUK);
+byId('uk-search').addEventListener('input', renderUK);
+document.querySelectorAll('.uk-table [data-sort]').forEach(button => button.addEventListener('click', () => {
+  const key = button.dataset.sort;
+  ukSort = {key, direction: ukSort.key === key ? -ukSort.direction : (key === 'name' || key === 'country' ? 1 : -1)};
+  document.querySelectorAll('.uk-table [data-sort] span').forEach(icon => { icon.textContent = '↕'; });
+  button.querySelector('span').textContent = ukSort.direction > 0 ? '↑' : '↓';
+  renderUK();
+}));
 
 function rebuildMap() {
   const size = map.getBoundingClientRect();
