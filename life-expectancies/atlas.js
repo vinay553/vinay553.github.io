@@ -22,9 +22,9 @@ const noData = '#e0dfd8';
 const normalize = value => value.toLowerCase().normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ');
 
-let width, height, pixelRatio, countyShapes, statePath, dataset, mapData, stateData, ukDataset;
+let width, height, pixelRatio, countyShapes, statePath, dataset, mapData, stateData, ukDataset, ukBoundaries;
 let counties, countyById, stateNames, selected, hovered, drag;
-let ukAreas = [], ukSort = {key: 'difference', direction: -1};
+let ukAreas = [], ukSort = {key: 'difference', direction: -1}, ukMetric = 'observed', ukSelected = null;
 let metric = 'observed';
 let paintedView, paintedMetric;
 let view = {scale: 1, x: 0, y: 0};
@@ -36,8 +36,9 @@ async function load(path) {
 }
 
 async function start() {
-  [dataset, mapData, stateData, ukDataset] = await Promise.all([
-    load('data/county-data.json'), load('data/counties.json'), load('data/states.json'), load('data/uk-area-data.json')
+  [dataset, mapData, stateData, ukDataset, ukBoundaries] = await Promise.all([
+    load('data/county-data.json'), load('data/counties.json'), load('data/states.json'),
+    load('data/uk-area-data.json'), load('data/uk-map.geojson')
   ]);
   initializeUK();
   stateNames = Object.fromEntries(stateData.features.map(({properties}) => [properties.abbr, properties.name]));
@@ -84,8 +85,95 @@ function initializeUK() {
     return card;
   }));
   byId('uk-description').textContent = `A simple average of ${number.format(summary.n)} UK local authorities is ${summary.meanObserved.toFixed(1)} years observed and ${summary.meanAdjusted.toFixed(1)} years after adjustment. The model-adjusted mean is ${summary.meanDifference.toFixed(1)} years above the U.S. county baseline.`;
-  byId('uk-coverage').textContent = `${number.format(summary.n)} UK local authorities with matched data. Historical county and regional geographies are omitted.`;
+  byId('uk-coverage').textContent = `${number.format(summary.n)} local authorities are included in the data and map; City of London and Isles of Scilly have no comparable estimate. Historical county and regional geographies are omitted.`;
+  byId('uk-legend').replaceChildren(...marks.map((label, index) => {
+    const item = document.createElement('div');
+    const swatch = document.createElement('i');
+    swatch.style.background = colors[index];
+    swatch.setAttribute('aria-hidden', 'true');
+    item.append(swatch, label);
+    return item;
+  }));
+  drawUKMap();
   renderUK();
+}
+
+function drawUKMap() {
+  if (!ukBoundaries) return;
+  const svg = byId('uk-map');
+  const {width, height} = byId('uk-map-shell').getBoundingClientRect();
+  if (!width || !height) return;
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  const projection = d3.geoConicConformal().parallels([49, 60]).fitExtent(
+    [[12, 12], [width - 12, height - 12]], ukBoundaries);
+  const path = d3.geoPath(projection);
+  const paths = ukBoundaries.features.map(feature => {
+    const code = feature.properties.code;
+    const area = ukDataset.areas[code];
+    const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    shape.setAttribute('d', path(feature));
+    shape.setAttribute('class', area ? 'uk-region' : 'uk-region is-no-data');
+    shape.setAttribute('fill', area ? color(area[ukMetric]) : noData);
+    shape.setAttribute('aria-label', area
+      ? `${area.name}, ${area.country}: ${area.observed.toFixed(1)} years observed, ${area.adjusted.toFixed(1)} adjusted`
+      : `${feature.properties.name}: no comparable estimate`);
+    if (!area) { shape.setAttribute('role', 'img'); return shape; }
+    shape.setAttribute('role', 'button');
+    shape.setAttribute('tabindex', '0');
+    shape.dataset.code = code;
+    if (code === ukSelected) shape.classList.add('is-selected');
+    shape.addEventListener('pointerenter', event => showUKTooltip(area, event));
+    shape.addEventListener('pointermove', event => moveUKTooltip(event));
+    shape.addEventListener('pointerleave', () => { byId('uk-map-tooltip').hidden = true; });
+    shape.addEventListener('focus', event => showUKTooltip(area, event));
+    shape.addEventListener('blur', () => { byId('uk-map-tooltip').hidden = true; });
+    shape.addEventListener('click', () => selectUKArea(code));
+    shape.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectUKArea(code); }
+    });
+    return shape;
+  });
+  svg.replaceChildren(...paths);
+}
+
+function showUKTooltip(area, event) {
+  const tooltip = byId('uk-map-tooltip');
+  tooltip.textContent = `${area.name} · ${area.country} | Observed ${area.observed.toFixed(1)} yrs | Adjusted ${area.adjusted.toFixed(1)} yrs`;
+  tooltip.hidden = false;
+  moveUKTooltip(event);
+}
+
+function moveUKTooltip(event) {
+  const shell = byId('uk-map-shell').getBoundingClientRect();
+  const point = event.clientX == null ? null : {x: event.clientX - shell.left, y: event.clientY - shell.top};
+  const tooltip = byId('uk-map-tooltip');
+  if (!point) return;
+  tooltip.style.left = `${Math.max(4, Math.min(point.x + 12, shell.width - tooltip.offsetWidth - 4))}px`;
+  tooltip.style.top = `${Math.max(4, Math.min(point.y + 12, shell.height - tooltip.offsetHeight - 4))}px`;
+}
+
+function selectUKArea(code) {
+  const area = ukDataset.areas[code];
+  if (!area) return;
+  ukSelected = code;
+  const profile = byId('uk-profile');
+  profile.replaceChildren();
+  const label = document.createElement('div'); label.className = 'eyebrow'; label.textContent = area.country.toUpperCase();
+  const title = document.createElement('h3'); title.textContent = area.name;
+  const list = document.createElement('dl');
+  const stats = [
+    ['Observed', `${area.observed.toFixed(1)} years`],
+    ['Adjusted', `${area.adjusted.toFixed(1)} years`],
+    ['vs U.S. county baseline', `${area.difference >= 0 ? '+' : ''}${area.difference.toFixed(1)} years`],
+    ['Income proxy', money.format(area.income)]
+  ];
+  for (const [term, value] of stats) {
+    const row = document.createElement('div'); const dt = document.createElement('dt'); const dd = document.createElement('dd');
+    dt.textContent = term; dd.textContent = value; row.append(dt, dd); list.append(row);
+  }
+  const note = document.createElement('p'); note.textContent = 'Income proxy is converted ONS disposable household income per person.';
+  profile.append(label, title, list, note);
+  byId('uk-map').querySelectorAll('.uk-region').forEach(shape => shape.classList.toggle('is-selected', shape.dataset.code === code));
 }
 
 function renderUK() {
@@ -100,6 +188,9 @@ function renderUK() {
   });
   const rows = filtered.map(area => {
     const tr = document.createElement('tr');
+    tr.tabIndex = 0;
+    tr.addEventListener('click', () => selectUKArea(area.code));
+    tr.addEventListener('keydown', event => { if (event.key === 'Enter') selectUKArea(area.code); });
     const diff = `${area.difference >= 0 ? '+' : ''}${area.difference.toFixed(1)} yrs`;
     for (const value of [area.name, area.country, `${area.observed.toFixed(1)} yrs`, `${area.adjusted.toFixed(1)} yrs`, diff]) {
       const td = document.createElement('td');
@@ -122,6 +213,11 @@ document.querySelectorAll('.uk-table [data-sort]').forEach(button => button.addE
   button.querySelector('span').textContent = ukSort.direction > 0 ? '↑' : '↓';
   renderUK();
 }));
+document.querySelectorAll('input[name=uk-metric]').forEach(input => input.addEventListener('change', () => {
+  ukMetric = input.value;
+  drawUKMap();
+}));
+new ResizeObserver(() => drawUKMap()).observe(byId('uk-map-shell'));
 
 function rebuildMap() {
   const size = map.getBoundingClientRect();

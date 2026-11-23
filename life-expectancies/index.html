@@ -26,6 +26,25 @@
         <p id="uk-description">Loading UK local-area data…</p>
       </div>
       <div id="uk-summary" class="uk-summary" aria-live="polite"></div>
+      <div class="uk-map-toolbar">
+        <fieldset class="metric"><legend>Map shows</legend>
+          <label><input name="uk-metric" type="radio" value="observed" checked><span>Observed</span></label>
+          <label><input name="uk-metric" type="radio" value="adjusted"><span>Adjusted</span></label>
+        </fieldset>
+        <span>Life expectancy at birth · years</span>
+      </div>
+      <div class="uk-map-layout">
+        <div id="uk-map-shell" class="uk-map-shell">
+          <svg id="uk-map" role="group" aria-label="Map of UK local authority life expectancy. Select an area for details."></svg>
+          <div id="uk-map-tooltip" class="uk-map-tooltip" role="status" hidden></div>
+        </div>
+        <aside id="uk-profile" class="uk-profile" aria-live="polite">
+          <div class="eyebrow">LOCAL AREA</div>
+          <h3>Choose an area</h3>
+          <p>Hover over an area to preview its figures, or select it to keep the details here.</p>
+        </aside>
+      </div>
+      <div class="uk-map-legend"><span>No estimate</span><div id="uk-legend" aria-label="Map color scale"></div><span>84+ years</span></div>
       <div class="uk-toolbar">
         <p>Explore the local-authority breakdown. Select a column heading to sort.</p>
         <div class="uk-filters">
@@ -48,6 +67,7 @@
           <li><a href="https://www.ons.gov.uk/datasets/life-expectancy-by-local-authority/editions/time-series/versions/1">ONS life expectancy by local authority</a></li>
           <li><a href="https://www.nomisweb.co.uk/datasets/c2011ks201ew">ONS / Nomis 2011 Census ethnicity, England and Wales</a> · <a href="https://www.scotlandscensus.gov.uk/documents/2011-census-table-data-council-area-2011/">Scotland Census ethnicity</a> · <a href="https://www.nisra.gov.uk/publications/2011-census-quick-statistics-tables-ethnicity-identity-language-and-religion">NISRA Census ethnicity</a></li>
           <li><a href="https://www.ons.gov.uk/economy/regionalaccounts/grossdisposablehouseholdincome/datasets/regionalgrossdisposablehouseholdincomegdhibylocalauthorityintheuk">ONS local-authority gross disposable household income</a> · <a href="https://api.worldbank.org/v2/country/GBR/indicator/PA.NUS.FCRF?date=2011:2013&amp;format=json">World Bank historical exchange rates</a></li>
+          <li><a href="https://www.data.gov.uk/dataset/f7fc6406-80ad-4d3a-8473-bef4ba629895/local-authority-districts-december-2019-boundaries-uk-bgc1">ONS 2019 UK local-authority boundaries</a> · <a href="https://www.data.gov.uk/dataset/51c760ee-e3f6-40a7-9031-34e78cb677c0/local-authority-districts-december-2020-boundaries-uk-bgc-v2">ONS 2020 Buckinghamshire boundary</a> · <a href="data/uk-map.geojson" download>Map boundary data</a></li>
         </ul>
       </div>
     </section>
